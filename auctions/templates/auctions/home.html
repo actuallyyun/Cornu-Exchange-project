@@ -1,7 +1,36 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>Your Listings</h2>
+<h2>Your Active Listings</h2>
 
-TODO
+<div>
+    {% for listing in listings %}
+    <a href="{% url 'listing' title=listing.title%}">
+        <li>{{ listing.title}} | {{ listing.description }} | {{ listing.starting_bid }} </li>
+    </a>
+    {% endfor %}
+</div>
+<hr>
+<h2>Items Sold </h2>
+<div>
+    {% for s in sold %}
+
+    <li>{{ s.title }} | Sold for {{ s.price_sold_for }} euros </li>
+
+
+    {% endfor %}
+
+</div>
+
+<hr>
+<h2> My Watchlist </h2>
+<div>
+    <!-- {% for s in sold %}
+
+    <li>{{ s.title }} | Sold for {{ s.price_sold_for }} euros </li>
+
+
+    {% endfor %} -->
+    TODO
+</div>
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.checks import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.http.request import RAISE_ERROR
@@ -105,8 +106,24 @@ def create_listing(request):
 
 @login_required
 def home(request, id):
+    # Query listings of this user
+    # TODO bug here:add condition if the list is empty
+
+    listings_id = User.objects.values_list(
+        'seller', flat=True).filter(id=id)
+    listings_active = []
+    listings_ended = []
+    # get the objects
+    for id in listings_id:
+        listing = Listing.objects.get(id=id)
+        if listing.active == False:
+            listings_ended.append(listing)
+        else:
+            listings_active.append(listing)
     return render(request, "auctions/home.html", {
-        'user_id': id
+        'user_id': id,
+        'listings': listings_active,
+        'sold': listings_ended
     })
 
 
@@ -190,7 +207,25 @@ def add_watchlist(request, title):
 
 
 def close_listing(request, title):
+    bids = Listing.objects.values_list(
+        'bids', flat=True).filter(title=title)
+    highest_bid = max(bids)
+
+    listing = Listing.objects.get(title=title)
     # Change the status of the listing to False
+    listing.active = False
+    if highest_bid is not None:
+        listing.price_sold_for = highest_bid
+    else:
+        listing.price_sold_for = 0
+
+    listing.save()
     # Find out the highest bidding, and show it to the user
-    # Redirect to homepage
-    return None
+
+    # Redirect to listing page
+    return render(request, 'auctions/close.html', {
+        "messages": "Close listing successful!",
+        "highest_bid": highest_bid,
+        "listing": listing,
+        "title": title
+    })

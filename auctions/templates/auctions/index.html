@@ -3,6 +3,7 @@
 {% block body %}
 <h2>Active Listings</h2>
 <a href="{% url 'new' %}">Add a new listing</a>
+
 <ul>
     {% for listing in listings %}
     <a href="{% url 'listing' title=listing.title%}">

@@ -16,7 +16,8 @@ class Listing(models.Model):
     description = models.TextField(default="textcontent")
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, default=1, related_name="seller")
-    status = BooleanField(default=True)
+    active = BooleanField(default=True)
+    price_sold_for = models.IntegerField(default=0)
 
     # class Category(models.TextChoices):
     #     Home = 'Home'
