@@ -17,11 +17,12 @@ class Listing(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, default=1, related_name="seller")
     active = BooleanField(default=True)
-    price_sold_for = models.IntegerField(default=0)
+    price_sold_for = models.IntegerField(default=0, null=True)
 
-    # class Category(models.TextChoices):
-    #     Home = 'Home'
-    #     Fashion = 'Fashion'
+    category = models.CharField(
+        max_length=10,
+        default='HOME'
+    )
 
     def __str__(self):
         return f"{self.title} ({self.starting_bid}euros)"
@@ -36,8 +37,10 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    listing = models.ForeignKey(Listing, default=1, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
+    listing = models.ForeignKey(
+        Listing, default=1, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(
+        User, default=1, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
 
 

@@ -8,23 +8,33 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import User, Listing, Bid, Comment, Watchlist
 from django import forms
+from . import util
 
 
 class NewListingForm(forms.Form):
     title = forms.CharField(widget=forms.TextInput)
     description = forms.CharField(widget=forms.Textarea)
     starting_bid = forms.IntegerField(label="Starting Price:")
+    category = forms.CharField(widget=forms.TextInput)
 
 
 class BiddingForm(forms.Form):
     bid = forms.IntegerField(label="Your bid:")
 
 
+class AddCommentsForm(forms.Form):
+    comments = forms.CharField(widget=forms.Textarea, label="")
+
+
+categories = Listing.objects.values_list('category', flat=True)
+
+
 def index(request):
     listings = Listing.objects.all()
 
     return render(request, "auctions/index.html", {
-        "listings": listings
+        "listings": listings,
+        "categories": categories
     })
 
 
@@ -92,38 +102,54 @@ def create_listing(request):
         title = request.POST['title']
         description = request.POST['description']
         starting_bid = request.POST['starting_bid']
+        category = request.POST['category']
         listing = Listing(title=title, description=description,
-                          starting_bid=starting_bid, user=seller)
+                          starting_bid=starting_bid, user=seller, category=category)
+
         # TODO validate the data & error checking
         listing.save()
         return HttpResponseRedirect(reverse('index'))
 
     else:
+
         return render(request, "auctions/newlisting.html", {
-            "new_listing_form": NewListingForm()
+            "new_listing_form": NewListingForm(),
+
         })
 
 
 @login_required
 def home(request, id):
-    # Query listings of this user
-    # TODO bug here:add condition if the list is empty
 
-    listings_id = User.objects.values_list(
-        'seller', flat=True).filter(id=id)
-    listings_active = []
-    listings_ended = []
+    # Request watchlist of the user
+    watchlist = util.get_watchlist(id)
+
+    # Request listings of this user
+    listings = util.get_listings(id)
+
+    # if the result is not None
+    if listings:
+        listings_active = []
+        listings_ended = []
     # get the objects
     for id in listings_id:
-        listing = Listing.objects.get(id=id)
-        if listing.active == False:
-            listings_ended.append(listing)
-        else:
-            listings_active.append(listing)
+        if id is not None:
+            listing = Listing.objects.get(id=id)
+            if listing.active == False:
+                listings_ended.append(listing)
+            else:
+                listings_active.append(listing)
+            return render(request, "auctions/home.html", {
+                'user_id': id,
+                'listings': listings_active,
+                'sold': listings_ended,
+                "categories": categories,
+                'watchlist': watchlist
+            })
+
     return render(request, "auctions/home.html", {
         'user_id': id,
-        'listings': listings_active,
-        'sold': listings_ended
+        "categories": categories
     })
 
 
@@ -135,13 +161,24 @@ def listing(request, title):
     else:
         try:
             listing = Listing.objects.get(title=title)
+            comments = []
+            comments_id = Listing.objects.values_list(
+                'comments', flat=True).filter(title=title)
+            for id in comments_id:
+                if id is not None:
+                    comment = Comment.objects.get(id=id)
+                    comments.append(comment)
+
         except Listing.DoesNotExist:
             raise Http404("Listing Not Found")
 
         return render(request, "auctions/listing.html", {
             "title": title,
             "listing": listing,
-            "biddingform": BiddingForm()
+            "biddingform": BiddingForm(),
+            "addcommentsform": AddCommentsForm(),
+            "comments": comments,
+            "categories": categories
         })
 
 
@@ -181,7 +218,8 @@ def bid(request, title):
             return render(request, "auctions/listing.html", {
                 "errormessage": "Cannot bid lower than the listing price nor exisiting bids.",
                 "biddingform": BiddingForm(),
-                "title": title
+                "title": title,
+                "categories": categories
             })
 
     return render(request, "auctions/listing.html", {
@@ -195,17 +233,23 @@ def bid(request, title):
 def add_watchlist(request, title):
     listing = Listing.objects.get(title=title)
     user = request.user
+
     existing_watchlist = User.objects.values_list(
         'watchlists', flat=True).filter(username=user)
-    if listing in existing_watchlist:
-        # TODO return an error msg saying it already exists. Show remove button
-        return HttpResponseRedirect(reverse('listing'), args=[title])
-    new_watchlist = Watchlist(user=user, item=listing)
-    new_watchlist.save()
-    id = user.id
-    return HttpResponseRedirect(reverse('home', args=[id]))
+    for l in existing_watchlist:
+        if l == listing:
+            return render(request, 'auctions/listing.html', {
+                "errormessagefromwatchlist": "This listing is already in your watchlist."
+            })
+        else:
+            new_watchlist = Watchlist(user=user, item=listing)
+            new_watchlist.save()
+            id = user.id
+            # TODO redirect user to the watchlist page
+            return HttpResponseRedirect(reverse('home', args=[id]))
 
 
+@login_required
 def close_listing(request, title):
     bids = Listing.objects.values_list(
         'bids', flat=True).filter(title=title)
@@ -228,4 +272,32 @@ def close_listing(request, title):
         "highest_bid": highest_bid,
         "listing": listing,
         "title": title
+    })
+
+
+@login_required
+def add_comments(request, title):
+
+    if request.method == "POST":
+        form = AddCommentsForm(request.POST)
+        if form.is_valid():
+            comments = form.cleaned_data['comments']
+            # save the comment to the database
+            comment = Comment(listing=Listing.objects.get(
+                title=title), user=request.user, content=comments)
+            comment.save()
+        return HttpResponseRedirect(reverse('listing', args=[title]))
+
+    return render(request, 'listing.html', {
+        "addcommentsform": AddCommentsForm()
+    })
+
+
+def category(request, category):
+    listings = Listing.objects.filter(category=category)
+    categories = Listing.objects.values_list('category', flat=True)
+    return render(request, 'auctions/category.html', {
+        'listings': listings,
+        'category': category,
+        'categories': categories
     })
