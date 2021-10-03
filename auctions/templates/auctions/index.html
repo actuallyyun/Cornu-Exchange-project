@@ -2,16 +2,19 @@
 
 {% block body %}
 <h2>Active Listings</h2>
-<a href="{% url 'new' %}">Add a new listing</a>
+{% for listing in listings %}
+<div class="row">
+    <div class="col-12">
+        <div class="card" style="width: 38rem;margin-bottom: 2rem;">
+            <img class="card-img-top" src="{{ listing.photo.url }}" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-title">{{ listing.title }} | {{ listing.starting_bid}} </h5>
+                <p class="card-text">{{ listing.description }}</p>
+                <a href="{% url 'listing' title=listing.title %}" class="btn btn-primary">View</a>
 
-<ul>
-    {% for listing in listings %}
-    <a href="{% url 'listing' title=listing.title%}">
-        <li>{{ listing.title}} | {{ listing.description }} | {{ listing.starting_bid}} </li>
-    </a>
-    {% endfor %}
-
-</ul>
-
-
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

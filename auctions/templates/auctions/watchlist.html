@@ -1,36 +1,24 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>Your Active Listings</h2>
+<h2>Your Watchlist</h2>
 
 <div>
-    {% for listing in listings %}
-    <a href="{% url 'listing' title=listing.title%}">
-        <li>{{ listing.title}} | {{ listing.description }} | {{ listing.starting_bid }} </li>
-    </a>
-    {% endfor %}
+
+    <ul>
+        {% for w in watchlist %}
+        <div style="margin-bottom: 20px;">
+            <div>
+                <li> <a href="{% url 'listing' title=w.item %}">
+                        {{ w.item }}
+                    </a>
+                    <input type="submit" value="Remove" action="{% url 'remove' title=w.item %}" method="POST">
+                </li>
+            </div>
+
+        </div>
+        {% endfor %}
+    </ul>
 </div>
-<hr>
-<h2>Items Sold </h2>
-<div>
-    {% for s in sold %}
 
-    <li>{{ s.title }} | Sold for {{ s.price_sold_for }} euros </li>
-
-
-    {% endfor %}
-
-</div>
-
-<hr>
-<h2> My Watchlist </h2>
-<div>
-    <!-- {% for s in sold %}
-
-    <li>{{ s.title }} | Sold for {{ s.price_sold_for }} euros </li>
-
-
-    {% endfor %} -->
-    TODO
-</div>
 {% endblock %}

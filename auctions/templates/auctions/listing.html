@@ -4,17 +4,21 @@
 
 
 
-<h2>{{ title }}</h2>
-
-<h3>{{ listing.description }}</h3>
-
-<h3>{{ listing.starting_bid }}</h3>
+<h1 class="display-4">{{ listing.title }}</h1>
 <div>
-    <a href="{% url 'watchlist' title=title %}">Add to Watchlist</a>
+    <a href="{% url 'watchlist' title=listing.title %}">Add to Watchlist</a>
 </div>
+<p>Listed on: {{ listing.date_listed }}</p>
+
+<img src="{{ listing.photo.url }}" alt="connect" style="max-height:300px" class="img-fluid img-thumbnail">
+
+<p class="fw-normal, lh-base">{{ listing.description }}</p>
+
+<h1 class="display-6">Bid starts at: {{ listing.starting_bid }}</h1>
+
 <div>
     {% if user.is_authenticated and user == listing.user %}
-    <a href="{% url 'close' title=title %}">Close the listing</a>
+    <a href="{% url 'close' title=listing.title %}">Close the listing</a>
     {% endif %}
 
 
@@ -36,14 +40,12 @@
 </div>
 
 <div>
-    <form action="{% url 'bid' title=title %}" method="POST">
+    <form action="{% url 'bid' title=listing.title %}" method="POST">
         {% csrf_token %}
 
         {{ biddingform }}
 
-        <button type="submit" class="btn btn-primary">Bid</button>
-
-
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;margin-bottom: 10px;">Place Bid</button>
 
     </form>
 
@@ -51,13 +53,13 @@
 </div>
 
 <div>
-    <form action="{% url 'comment' title=title %}" method="POST">
+    <form action="{% url 'comment' title=listing.title %}" method="POST">
         {% csrf_token %}
 
         {{ addcommentsform }}
 
         <div>
-            <button type="submit" class="btn btn-primary">Comment</button>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;margin-bottom: 10px;">Comment</button>
 
         </div>
 
@@ -67,19 +69,28 @@
 </div>
 
 <div>
-    <h4>Comments</h4>
-    <ul>
 
-        {% for commment in comments %}
-
-        <li>{{ comment }} {{ comment.user }} : {{ comment.content }}</li>
-
-        {% endfor %}
-
-    </ul>
 </div>
+<br>
+<hr>
+<h2>Comments:</h2>
 
+{% if comments %}
+<ul>
+    {% for c in comments %}
+    <br />
+    <li>
+        <strong> {{ c.user }}</strong> {{ c.date_commented }}:
+        <p>{{ c.content }}</p>
+        <br>
+    </li>
 
+    {% endfor %}
 
+</ul>
+{% else %}
+<p>No comments yet...</p>
 
+{% endif %}
+<hr>
 {% endblock %}

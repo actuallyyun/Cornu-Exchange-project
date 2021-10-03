@@ -27,13 +27,17 @@
                         <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
                     </li>
                     {% if user.is_authenticated %}
+                    <li class="nav-items">
+                        <a class='nav-link' href="{% url 'home' user_id=user.id %}">My Homepage</a>
+                    </li>
+                    <li class="nav-items">
+                        <a class='nav-link' href="{% url 'new' %}">Post a New Listing</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                     </li>
 
-                    <li class="nav-items">
-                        <a class='nav-link' href="{% url 'home' id=user.id %}">My homepage</a>
-                    </li>
+
 
                     {% else %}
                     <li class="nav-item">
@@ -42,6 +46,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'register' %}">Register</a>
                     </li>
+
                     {% endif %}
                 </ul>
                 <hr>

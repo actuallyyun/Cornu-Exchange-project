@@ -3,47 +3,16 @@
 {% block body %}
 <h2>{{ title }}</h2>
 
-<!-- <h3>{{ listing.description }}</h3>
-
-<h3>{{ listing.starting_bid }}</h3> -->
-<!-- <div>
-    <a href="{% url 'watchlist' title=title %}">Add to Watchlist</a>
-</div>
-<div>
-    {% if user.is_authenticated and user == listing.user %}
-    <a href="{% url 'close' title=title %}">Close the listing</a>
-    {% endif %}
-
-
-</div> -->
-<!-- <div>
-    {% if errormessege %}
-    <h4>{{ errormessege }}</h4>
-    {% endif %}
-</div> -->
-
 <div>
     {% if messages %}
-    <h5>{{ messages }} You sold {{ listing.title }} for {{ highest_bid }} euros</h5>
+    <h5>{{ messages }} </h5>
+    <p> You sold {{ listing.title }} for {{ highest_bid }} euros</p>
     {% endif %}
 
 </div>
-<a href="{% url 'home' id=user.id %}">Go back to your home page</a>
-
-<!-- <div>
-    <form action="{% url 'bid' title=title %}" method="POST">
-        {% csrf_token %}
-
-        {{ biddingform }}
-        <div>
-            <button type="submit" class="btn btn-primary">Bid</button>
-
-        </div>
-
-    </form> -->
+<a href="{% url 'home' user_id=user.id %}">Go back to your home page</a>
 
 
-<!-- </div> -->
 
 
 {% endblock %}

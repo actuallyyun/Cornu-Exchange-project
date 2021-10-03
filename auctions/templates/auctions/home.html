@@ -3,36 +3,65 @@
 {% block body %}
 <h2>My Listings</h2>
 
-<div>
-    {% for listing in listings %}
-    <a href="{% url 'listing' title=listing.title%}">
-        <li>{{ listing.title}} | {{ listing.description }} | {{ listing.starting_bid }} </li>
-    </a>
-    {% endfor %}
+<div style="margin-top: 20px;">
+    {% if listings %}
+    <ul>
+        {% for listing in listings %}
+        <a href="{% url 'listing' listing.title%}">
+            <li>{{ listing.title }} </li>
+        </a>
+        {% endfor %}
+
+    </ul>
+    {% endif %}
 </div>
 <hr>
 <h2>Items Sold </h2>
-<div>
+<div style="margin-top: 20px;">
+    {% if sold %}
     {% for s in sold %}
-
     <li>{{ s.title }} | Sold for {{ s.price_sold_for }} euros </li>
-
-
     {% endfor %}
-
+    {% else %}
+    <p>You haven't sold anything yet.
+    </p>
+    {% endif %}
+    <p style="margin-top: 20px;">You earned: <strong>{{ total_earnings }} </strong>euros</p>
 </div>
 
 <hr>
-<h2> My Watchlist </h2>
-<div>
-    {% for list in watchlist %}
-    <ul>
-        <a href="{% url 'listing' title=list.title%}">
-            <li>{{ list }}{{ list.title }} </li>
-        </a>
-    </ul>
+<h2>My bids </h2>
+<div style="margin-top: 20px;">
+    {% if bids %}
+    {% for bid in bids %}
+    <a href="{% url 'listing' title=bid.item %}">
+        <li>{{ bid.item }} </li>
+    </a>
+    <p> Bid for <strong>{{ bid.offer }} </strong>euros</p>
 
     {% endfor %}
+    {% else %}
+    <p>You haven't bid anything yet.
+    </p>
+    {% endif %}
+</div>
 
+
+
+<hr>
+<h2> My Watchlist </h2>
+<div style="margin-top: 20px;">
+    {% if watchlist %}
+    <ul>
+        {% for w in watchlist %}
+        <a href="{% url 'listing' title=w.item %}">
+            <li>{{ w.item }} </li>
+        </a>
+        {% endfor %}
+
+    </ul>
+    {% else %}
+    <p> Your watchlist is empty. </p>
+    {% endif %}
 </div>
 {% endblock %}
