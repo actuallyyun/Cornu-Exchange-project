@@ -1,15 +1,18 @@
 from functools import total_ordering
+
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.db import IntegrityError
 from django.forms.fields import ImageField
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.http.request import RAISE_ERROR
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-from .models import User, Listing, Bid, Comment, Watchlist
-from . import util, forms
+from django.contrib import messages
+
+from . import forms, util
+from .models import Bid, Comment, Listing, User, Watchlist
 
 categories = util.list_categories()
 
@@ -33,6 +36,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            messages.success(request, 'Login successful.')
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
@@ -74,27 +78,35 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+# The user creates a listing by filing up the form
+
 @login_required
 def create_listing(request):
 
+    # If the request method is "POST", create the lsiting
     if request.method == "POST":
         form = forms.NewListingForm(request.POST, request.FILES)
-        # get the user
-        seller = request.user
+        if form.is_valid():
 
-        # get the listing data from the forms
-        title = request.POST['title']
-        description = request.POST['description']
-        starting_bid = request.POST['starting_bid']
-        category = request.POST['category']
-        img = request.FILES['listing_image']
-        listing = Listing(title=title, description=description,
-                          starting_bid=starting_bid, user=seller, category=category, photo=img)
+            seller = request.user
 
-        listing.save()
-        # Redirect user to the new listing page
-        return HttpResponseRedirect(reverse('listing', args=[title]))
+            # get the listing data from the forms
+            title = request.POST['title']
+            description = request.POST['description']
+            starting_bid = request.POST['starting_bid']
+            category = request.POST['category']
+            img = request.FILES['listing_image']
+            listing = Listing(title=title, description=description,
+                              starting_bid=starting_bid, user=seller, category=category, photo=img)
 
+            listing.save()
+
+            # Redirect user to the new listing page
+            return HttpResponseRedirect(reverse('listing', args=[listing.id]))
+            # TODO display error if user put invalid info Can I get the form valid it for me while the user is filling in the number
+        else:
+            raise Http404
+    # If not, render the create listing page with the form
     else:
 
         return render(request, "auctions/newlisting.html", {
@@ -103,14 +115,16 @@ def create_listing(request):
         })
 
 
+# The user's home page. It displays her listings, watchlists and bids.
 @login_required
 def home(request, user_id):
     user = request.user
     # Request watchlist of the user
-    watchlist = util.get_watchlist(user)
+
+    watchlist = user.watchlists.all()
 
     # Request listings of this user
-    listings = util.get_user_listings(user)
+    listings = user.listing.all()
 
     # Request bids of this user
     bids = user.bids.all()
@@ -140,88 +154,77 @@ def home(request, user_id):
     })
 
 
-def listing(request, title):
-    listing = Listing.objects.get(title=title)
-    # Get the comments of this listing
-    if listing.comments.all().exists():
-        comments = listing.comments.all()
-    else:
-        comments = None
-
-    return render(request, "auctions/listing.html", {
-        "listing": listing,
-        "biddingform": forms.BiddingForm(),
-        "addcommentsform": forms.AddCommentsForm(),
-        "categories": categories,
-        "comments": comments
-    })
-
-
-@login_required
-def bid(request, title):
-
+def listing(request, listing_id):
     if request.method == "POST":
-        form = forms.BiddingForm(request.POST)
-        listing = Listing.objects.get(title=title)
+        listing = Listing.objects.get(id=listing_id)
+        form = forms.BiddingForm(request.POST, listing)
         bidder = request.user
 
         if form.is_valid():
-
             bidding_price = form.cleaned_data['bid']
-            # Get the starting price of the listing
-            starting_bid = listing.starting_bid
-            # get the max existing bids
+            bid = Bid(item=listing, user=bidder,
+                      offer=bidding_price)
+            bid.save()
+            messages.success(request, "Bidding successful!")
+            return HttpResponseRedirect(reverse('home', args=[bidder.id]))
 
-            max_bid = util.max_bid(listing)
-            if max_bid and bidding_price > max_bid:
+        # display error messages if bid failed
+        return render(request, "auctions/listing.html", {
+            "biddingform": form,
+            "listing": listing,
+            "categories": categories
+        })
 
-                util.save_bid(listing, bidder, bidding_price)
-            elif not max_bid and bidding_price > starting_bid:
+    else:
+        listing = Listing.objects.get(id=listing_id)
+        # Get the comments of this listing
+        comments = listing.comments.all()
 
-                util.save_bid(listing, bidder, bidding_price)
-                # Tell user the bid succeded and redirect the user to her home page
-                return HttpResponseRedirect(reverse('home', args=[bidder.id]))
+        max_bid = util.max_bid(listing)
+        current_bid = max_bid or listing.starting_bid
 
-            else:
-                # display error messages if bid failed
-                return render(request, "auctions/listing.html", {
-                    "errormessage": "Cannot bid lower than the listing price nor exisiting bids.",
-                    "biddingform": forms.BiddingForm(),
-                    "listing": listing,
-                    "categories": categories
-                })
-
-    return render(request, "auctions/listing.html", {
-        "biddingform": forms.BiddingForm()
-    })
+        return render(request, "auctions/listing.html", {
+            "listing": listing,
+            "biddingform": forms.BiddingForm(None, listing),
+            "addcommentsform": forms.AddCommentsForm(),
+            "categories": categories,
+            "comments": comments,
+            "current_bid": current_bid
+        })
 
 
-# User can add a listing to her wishlist
+# User can add and remove a listing to her wishlist
 @login_required
-def add_watchlist(request, title):
+def watchlist(request, listing_id):
     user = request.user
 
-    if request.method == "POST":
-        listing = Listing.objects.get(title=title)
+    # If the request is sent by the a tag through "GET" method, attemp to add an item to the watchlist
+    if request.method == "GET":
+        listing = Listing.objects.get(pk=listing_id)
 
-        # Retrieve the existing watchlist
+        # If item already in the watchlist, display an error msg and send user back to the listing page
         if user.watchlists.all().filter(item=listing).exists():
-            errormessagefromwatchlist = "This listing is already in your watchlist."
-            return HttpResponseRedirect(reverse('listing', args=[title]))
+            messages.error(request, "Lisitng already exists.")
+            return HttpResponseRedirect(reverse('listing', args=[listing_id]))
 
+        # Else, add the item to the watchlist
         else:
             new_watchlist = Watchlist(user=user, item=listing)
             new_watchlist.save()
-            # Redirect user to the watchlist page
-            return render(request, 'auctions/watchlist.html', {
-                "watchlist": user.watchlists.all(),
-                "categories": categories
-            })
+
+            # Redirect user to the home page
+            return HttpResponseRedirect(reverse('home', args=[user.id]))
+
+    # If the request is sent by the form through "POST" method, remove the item by deleting the watclist object
     else:
-        return render(request, 'auctions/watchlist.html', {
-            "watchlist": user.watchlists.all(),
-            "categories": categories
-        })
+        # Get the watchlist instance with its id
+        watchlist = get_object_or_404(Watchlist, id=listing_id)
+
+        watchlist.delete()
+        messages.success(request, "Item removed successful.")
+
+        # redirect user to her homepage
+        return HttpResponseRedirect(reverse('home', args=[user.id]))
 
 
 @login_required
@@ -253,7 +256,7 @@ def add_comments(request, title):
             comment = Comment(listing=listing,
                               user=request.user, content=comments)
             comment.save()
-        return HttpResponseRedirect(reverse('listing', args=[title]))
+        return HttpResponseRedirect(reverse('listing', args=[listing.id]))
 
     return render(request, 'listing.html', {
         "addcommentsform": forms.AddCommentsForm()
@@ -268,12 +271,3 @@ def category(request, category):
         'category': category,
         "categories": categories
     })
-
-
-@ login_required
-def remove_watchlist(request, title):
-    user = request.user
-    if request.method == "POST":
-        item = Listing.objects.get(title=title)
-        user.watchlists.all().remove(item)
-        return HttpResponseRedirect(reverse('watchlist'), args=[title])

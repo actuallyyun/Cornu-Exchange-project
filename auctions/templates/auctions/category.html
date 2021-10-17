@@ -5,7 +5,7 @@
 
 <ul>
     {% for listing in listings %}
-    <a href="{% url 'listing' title=listing.title %}">
+    <a href="{% url 'listing' listing_id=listing.id %}">
         <li>{{ listing.title }} | {{ listing.description }} | {{ listing.starting_bid}} </li>
     </a>
     {% endfor %}

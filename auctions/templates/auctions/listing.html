@@ -6,41 +6,29 @@
 
 <h1 class="display-4">{{ listing.title }}</h1>
 <div>
-    <a href="{% url 'watchlist' title=listing.title %}">Add to Watchlist</a>
+    <a href="{% url 'watchlist' listing_id=listing.id %}">Add to Watchlist</a>
 </div>
+
+
 <p>Listed on: {{ listing.date_listed }}</p>
 
 <img src="{{ listing.photo.url }}" alt="connect" style="max-height:300px" class="img-fluid img-thumbnail">
 
 <p class="fw-normal, lh-base">{{ listing.description }}</p>
 
-<h1 class="display-6">Bid starts at: {{ listing.starting_bid }}</h1>
+<h1 class="display-6">Current price: {{ current_bid }}</h1>
 
 <div>
     {% if user.is_authenticated and user == listing.user %}
-    <a href="{% url 'close' title=listing.title %}">Close the listing</a>
+    <a href="{% url 'close' listing_id=listing.id %}">Close the listing</a>
     {% endif %}
 
 
 </div>
+
+{% if user.is_authenticated %}
 <div>
-    {% if errormessege %}
-    <h4>{{ errormessege }}</h4>
-
-    {% endif %}
-</div>
-
-
-<div>
-    {% if errormessagefromwatchlist %}
-    <h5>{{ errormessagefromwatchlist }} </h5>
-    <a href="#">Remove From Your Watchlist</a>
-    {% endif %}
-
-</div>
-
-<div>
-    <form action="{% url 'bid' title=listing.title %}" method="POST">
+    <form action="" method="POST">
         {% csrf_token %}
 
         {{ biddingform }}
@@ -49,24 +37,18 @@
 
     </form>
 
-
 </div>
 
 <div>
-    <form action="{% url 'comment' title=listing.title %}" method="POST">
+    <form action="{% url 'comment' listing_id=listing.id %}" method="POST">
         {% csrf_token %}
-
         {{ addcommentsform }}
-
         <div>
             <button type="submit" class="btn btn-primary" style="margin-top: 10px;margin-bottom: 10px;">Comment</button>
-
         </div>
-
     </form>
-
-
 </div>
+{% endif %}
 
 <div>
 

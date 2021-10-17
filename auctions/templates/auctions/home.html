@@ -7,7 +7,7 @@
     {% if listings %}
     <ul>
         {% for listing in listings %}
-        <a href="{% url 'listing' listing.title%}">
+        <a href="{% url 'listing' listing_id=listing.id %}">
             <li>{{ listing.title }} </li>
         </a>
         {% endfor %}
@@ -34,10 +34,9 @@
 <div style="margin-top: 20px;">
     {% if bids %}
     {% for bid in bids %}
-    <a href="{% url 'listing' title=bid.item %}">
-        <li>{{ bid.item }} </li>
+    <a href="{% url 'listing' listing_id=bid.id %}">
+        <li>{{ bid.item }} Bid for <strong>{{ bid.offer }} </strong>euros</li>
     </a>
-    <p> Bid for <strong>{{ bid.offer }} </strong>euros</p>
 
     {% endfor %}
     {% else %}
@@ -50,13 +49,17 @@
 
 <hr>
 <h2> My Watchlist </h2>
-<div style="margin-top: 20px;">
+<div style="margin-top: 20px; display: inline;">
     {% if watchlist %}
     <ul>
         {% for w in watchlist %}
-        <a href="{% url 'listing' title=w.item %}">
+        <a href="{% url 'listing' listing_id=w.item.id %}">
             <li>{{ w.item }} </li>
         </a>
+        <form action="{% url 'watchlist' listing_id=w.id %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="Remove">
+        </form>
         {% endfor %}
 
     </ul>

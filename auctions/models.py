@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.core.exceptions import TooManyFieldsSent
 from django.db import models
 from django.db.models.base import Model
@@ -12,7 +12,7 @@ class User(AbstractUser):
 
 
 class Listing(models.Model):
-    starting_bid = models.IntegerField()
+    starting_bid = models.PositiveIntegerField()
     title = models.CharField(max_length=64)
     description = models.TextField(default="textcontent")
     photo = models.ImageField(null=True, blank=True,
@@ -20,7 +20,7 @@ class Listing(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, default=1, related_name="listing")
     active = BooleanField(default=True)
-    price_sold_for = models.IntegerField(default=0, null=True)
+    price_sold_for = models.IntegerField(default=0, blank=True)
     date_listed = models.DateField(default=timezone.now)
     category = models.CharField(
         max_length=10,
