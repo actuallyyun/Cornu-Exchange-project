@@ -1,18 +1,14 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>{{ title }}</h2>
 
 <div>
-    {% if messages %}
-    <h5>{{ messages }} </h5>
     <p> You sold {{ listing.title }} for {{ highest_bid }} euros</p>
-    {% endif %}
+    {% include 'auctions/items_caption.html' %}
 
 </div>
+<br>
 <a href="{% url 'home' user_id=user.id %}">Go back to your home page</a>
-
-
 
 
 {% endblock %}

@@ -1,0 +1,59 @@
+{% load template_extras %}
+<h1 class="display-4">{{ listing.title }}</h1>
+<div>
+    <a href="{% url 'watchlist' listing_id=listing.id %}">Add to Watchlist</a>
+</div>
+
+
+<p>Listed on: {{ listing.date_listed }}</p>
+
+<img src="{{ listing.photo.url }}" alt="connect" style="max-height:300px" class="img-fluid img-thumbnail">
+
+<p class="fw-normal, lh-base">{{ listing.description|convert_markdown|safe }}</p>
+
+<h1 class="display-6">Current price: {{ current_bid }}</h1>
+
+<div>
+    {% if user.is_authenticated and user == listing.user %}
+    <a href="{% url 'close' listing.id %}">Close the listing</a>
+    {% endif %}
+</div>
+{% if user.is_authenticated %}
+<div>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{ biddingform }}
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;margin-bottom: 10px;">Place Bid</button>
+    </form>
+</div>
+
+<div>
+    <form action="{% url 'comment' listing_id=listing.id %}" method="POST">
+        {% csrf_token %}
+        {{ addcommentsform }}
+        <div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;margin-bottom: 10px;">Comment</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+<br>
+<hr>
+<h2>Comments:</h2>
+{% if comments %}
+<ul>
+    {% for c in comments %}
+    <br />
+    <li>
+        <strong> {{ c.user }}</strong> {{ c.date_commented }}:
+        <p>{{ c.content }}</p>
+        <br>
+    </li>
+
+    {% endfor %}
+</ul>
+{% else %}
+<p>No comments yet...</p>
+
+{% endif %}
+<hr>

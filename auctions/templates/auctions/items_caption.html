@@ -1,0 +1,6 @@
+<a href="{% url 'listing' listing_id=listing.id %}">
+    <p class="display-5">{{ listing.title }}</p>
+</a>
+<p>Listed on: {{ listing.date_listed }}</p>
+
+<img src="{{ listing.photo.url }}" alt="connect" style="max-height:300px" class="img-fluid img-thumbnail">

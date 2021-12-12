@@ -1,84 +1,79 @@
 {% load static %}
-
+{% load template_extras %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title>{% block title %}Auctions{% endblock %}</title>
+    <title>{% block title %}Cornu Exchange{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
 </head>
 <div class="container">
     <div class="row">
-        <div class="col-8">
+        <div class="col-9">
 
             <body>
-
-                {% if messages %}
-                <div class="alert alert-primary" role="alert">
-                    <ul class="messages">
-                        {% for message in messages %}
-                        <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-                            {% endfor %}
-                    </ul>
+                <div>
+                    {% if messages %}
+                    <div class="django-messages alert alert-success" role="alert">
+                        <ul class="messages">
+                            {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                                {{ message }}
+                                </li>
+                                {% endfor %}
+                        </ul>
+                    </div>
                 </div>
                 {% endif %}
-
-                <h1>Auctions</h1>
-                <div>
-                    {% if user.is_authenticated %}
-                    Welcome <strong>{{ user.username }}</strong>!
-                    {% else %}
-                    Not signed in.
-                    {% endif %}
-                </div>
-
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                    <li class="nav-items">
-                        <a class='nav-link' href="{% url 'home' user_id=user.id %}">My Homepage</a>
-                    </li>
-                    <li class="nav-items">
-                        <a class='nav-link' href="{% url 'new' %}">Post a New Listing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                    </li>
-
-
-
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
-
-                    {% endif %}
-                </ul>
-                <hr>
-
+                <nav>
+                    <h1>Cornu Exchange</h1>
+                    <div class="welcome">
+                        {% if user.is_authenticated %}
+                        Welcome <strong>{{ user.username }}</strong>!
+                        {% else %}
+                        You are not signed in.
+                        {% endif %}
+                    </div>
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-items">
+                            <a class='nav-link' href="{% url 'home' user_id=user.id %}">My Homepage</a>
+                        </li>
+                        <li class="nav-items">
+                            <a class='nav-link' href="{% url 'new' %}">Post a New Listing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                    <hr>
+                </nav>
                 {% block body %}
                 {% endblock %}
+
             </body>
         </div>
 
-        <div class="col-4">
+    </div>
+    <div class="col-lg-3">
 
-            <ul>
-                <h3>All Categories:</h3>
-                {% for c in categories %}
-                <a href="{% url 'category' category=c %}">
-                    <li>{{ c }}</li>
-                </a>
-                {% endfor %}
-            </ul>
-        </div>
+        {% block category %}
+        {% endblock %}
+
     </div>
 </div>
 
