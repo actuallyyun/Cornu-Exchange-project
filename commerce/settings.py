@@ -27,7 +27,7 @@ SECRET_KEY = '6ps8j!crjgrxt34cqbqn7x&b3y%(fny8k8nh21+qa)%ws3fh!q'
 DEBUG = False
 
 ALLOWED_HOSTS = ['cornu-exchange.herokuapp.com']
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
     'whitenoise.runserver_nostatic',
 ]
 
@@ -54,9 +53,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
-
-if DEBUG:
-    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware']+MIDDLEWARE
 
 INTERNAL_IPS = [
     # ...
@@ -90,8 +86,13 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'commerce_db',
+        'USER': 'postgres',
+        'PASSWORF': 'pTu2TfRrcjtNb2zYyTKv',
+        'HOST': 'localhost',
+        'PORT': '5432',
+
     }
 }
 db_from_env = dj_database_url.config(conn_max_age=600)
