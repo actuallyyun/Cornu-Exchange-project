@@ -1,5 +1,5 @@
 from functools import total_ordering
-
+import os
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
@@ -17,9 +17,13 @@ from .models import Bid, Comment, Listing, User, Watchlist
 
 def index(request):
     listings = list(Listing.objects.all().filter(active=True))
+    if len(listings) == 0:
+        categories = ['No listings yet']
+    else:
+        categories = listings[0].categories()
     return render(request, "auctions/index.html", {
         "listings": listings,
-        "categories": listings[0].categories()
+        "categories": categories
     })
 
 
