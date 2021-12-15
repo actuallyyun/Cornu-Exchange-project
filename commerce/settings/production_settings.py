@@ -1,5 +1,6 @@
 import os
 from .base_settings import *
+import django_heroku
 
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
@@ -19,6 +20,7 @@ DATABASES = {
         'PASSWORD': 'pTu2TfRrcjtNb2zYyTKv',
         'HOST': 'localhost',
         'PORT': '5432',
-
     }
 }
+
+django_heroku.settings(locals())
