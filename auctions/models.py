@@ -33,7 +33,7 @@ class Listing(models.Model):
     description = models.TextField(
         default="textcontent", blank=True, null=True)
     photo = models.ImageField(null=True, blank=True,
-                              upload_to="images/", default=0)
+                              upload_to="images/", default="images/20210527-baechu-kimchi-vicky-wasik-seriouseats-seriouseats-3-18a2d6d7d1d74a7a82c_4C1LTps.jpeg",)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="listing", null=True)
     active = BooleanField(default=True)
