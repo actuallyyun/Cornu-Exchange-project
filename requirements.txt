@@ -5,4 +5,6 @@ markdown2==2.4.1
 psycopg2==2.9.2
 whitenoise==5.3.0
 Django-heroku
+django-environ==0.8.1
+
 
