@@ -12,15 +12,5 @@ ALLOWED_HOSTS = ['cornu-exchange.herokuapp.com',
 STATIC_URL = 'stacitfiles/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'commerce_db',
-        'USER': 'postgres',
-        'PASSWORD': 'pTu2TfRrcjtNb2zYyTKv',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
 
 django_heroku.settings(locals())
