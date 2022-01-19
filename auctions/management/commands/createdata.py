@@ -76,21 +76,16 @@ class Command(BaseCommand):
         #                            description=description,
         #                            category=fake.unique.auctions_category())
 
-        # for i in list(Listing.objects.all()):
-        #     # i.photo = "images/20210527-baechu-kimchi-vicky-wasik-seriouseats-seriouseats-3-18a2d6d7d1d74a7a82c_4C1LTps.jpeg"
-        #     i.category = fake.unique.auctions_category()
-        #     i.save()
-
         # Delete all listings
         # for i in list(Listing.objects.all()):
         #     i.delete()
 
-        # Generate bids
-        # for _ in range(10):
-        #     Bid.objects.create(item=fake.auctions_item(
-        #     ), user=fake.auctions_user(), offer=random.randint(30, 990))
+        # # # Generate bids
+        for _ in range(10):
+            Bid.objects.create(item=fake.auctions_item(
+            ), user=fake.auctions_user(), offer=random.randint(30, 990))
 
-        # Generate comments
+        # # # Generate comments
         # for _ in range(10):
         #     Comment.objects.create(listing=fake.auctions_item(
         #     ), user=fake.auctions_user(), content=fake.text(max_nb_chars=40))
