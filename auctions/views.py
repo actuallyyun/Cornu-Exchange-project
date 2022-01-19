@@ -17,7 +17,10 @@ from .models import Bid, Comment, Listing, User, Watchlist
 
 
 def index(request):
-    listings = list(Listing.objects.all().filter(active=True))
+    try:
+        listings = list(Listing.objects.all().filter(active=True))
+    except:
+        raise Http404('db not working')
 
     p = Paginator(listings, 5)
     page_number = request.GET.get('page')
