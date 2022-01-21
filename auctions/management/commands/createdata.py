@@ -81,9 +81,9 @@ class Command(BaseCommand):
         #     i.delete()
 
         # # # Generate bids
-        for _ in range(10):
-            Bid.objects.create(item=fake.auctions_item(
-            ), user=fake.auctions_user(), offer=random.randint(30, 990))
+        # for _ in range(10):
+        #     Bid.objects.create(item=fake.auctions_item(
+        #     ), user=fake.auctions_user(), offer=random.randint(30, 990))
 
         # # # Generate comments
         # for _ in range(10):
