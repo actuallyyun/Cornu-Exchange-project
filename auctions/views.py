@@ -1,5 +1,5 @@
 from functools import total_ordering
-
+import os
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
@@ -10,16 +10,37 @@ from django.http.request import RAISE_ERROR
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from . import forms
 from .models import Bid, Comment, Listing, User, Watchlist
 
 
 def index(request):
-    listings = list(Listing.objects.all().filter(active=True))
+    try:
+        listings = list(Listing.objects.all().filter(active=True))
+    except:
+        raise Http404('db not working')
+
+    p = Paginator(listings, 5)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    try:
+        listings = p.page(page_number)
+    except PageNotAnInteger:
+        listings = p.page(1)
+    except EmptyPage:
+        listings = p.page(p.num_pages)
+
+    if len(listings) == 0:
+        categories = ['No listings yet']
+    else:
+        categories = listings[0].categories()
     return render(request, "auctions/index.html", {
         "listings": listings,
-        "categories": listings[0].categories()
+        "categories": categories,
+        'page_obj': page_obj
     })
 
 
