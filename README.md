@@ -2,7 +2,7 @@ This is the project 2 of the CS50W course.
 https://cs50.harvard.edu/web/2020/projects/2/commerce/
 
 ##### Commerce, an ebay like website
-It is build with Python and Django. 
+It is build with Python and Django. Database powered by Postgresql. Deployed with Heroku. Static file served with AWS S3.
 1. Users can list items and set a price. 
 2. Users can browse all the listings on the website.
 3. Users can place bids and purchasing items.
